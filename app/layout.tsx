@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: { default: `${BRAND} | 미세방충망·촘촘망·현관방충망 시공`, template: '%s' },
   description: '방충망 실측·시공·교체. 일반망·촘촘망·미세망 차이와 고르는 법, 현관 방충망·롤방충망 설치, 모헤어·망 교체까지.',
   robots: { index: true, follow: true },
+  verification: { google: 'NXk27MmNQTC6SZUqvqQcsZIOUkR0xofIjCmXv2FojZE', other: { 'naver-site-verification': 'aafa8bd7e1bb021bcdbf2034744f8f795e2af362' } },
   alternates: { types: { 'application/rss+xml': `${SITE_URL}/rss.xml` } },
   openGraph: { type: 'website', siteName: BRAND, locale: 'ko_KR', images: ogImages('home', BRAND) },
   twitter: { card: 'summary_large_image', images: ogImages('home', BRAND) },
