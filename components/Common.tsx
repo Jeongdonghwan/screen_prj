@@ -58,6 +58,7 @@ export const Header = () => (
       <nav className="nav">
         <Link href="/#mesh">망 종류</Link>
         <Link href="/area/">지역</Link>
+        <Link href="/blog/">블로그</Link>
         <a href={tel} className="nav-call"><IconPhone />{CONTACT.phone}</a>
       </nav>
     </div>
@@ -70,6 +71,7 @@ export const Footer = () => (
       <div>
         <strong className="foot-brand">{BRAND}</strong>
         <p>방충망 실측·시공·교체. 일반망·촘촘망·미세망·롤방충망·현관방충망.</p>
+        <p className="foot-links"><Link href="/area/">지역별 안내</Link><Link href="/blog/">블로그</Link></p>
         {LINKS.length > 0 && <p className="foot-links">{LINKS.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noopener">{l.label}</a>)}</p>}
       </div>
       <ul className="foot-info">

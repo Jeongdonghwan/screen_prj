@@ -1,10 +1,10 @@
-"""OG 카드 생성: public/og/<slug>.jpg + home.jpg + area.jpg (1200x630, JPEG 80).
+"""OG 카드 생성: public/og/<slug>.jpg + home.jpg + area.jpg + blog.jpg + blog-<글 slug>.jpg (1200x630, JPEG 80).
    python -I scripts/make_og.py           # 없는 것만 생성
    python -I scripts/make_og.py --force   # 전부 다시
 배경 = 참고 사진(data/photo_credits.json 의 hero 사진, 슬러그 해시로 고정 — lib/photos.ts heroPhoto 와 같은 사진) 어둡게.
 네이버는 og 이미지를 가운데 정사각형으로 잘라 보여 주므로 글자는 가운데 630px(285~915) 안쪽에 둔다.
 브랜드·전화는 lib/site.ts 에서 읽는다."""
-import json, re, sys
+import datetime, json, os, re, sys
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 
@@ -82,13 +82,32 @@ def card(key, title, photo):
     im.save(OUT / f'{key}.jpg', 'JPEG', quality=80, optimize=True, progressive=True)
 
 
+def blog_posts():
+    """content/blog/*.md ('_' 로 시작하면 비공개, date/publishedAt 이 빌드일보다 미래면 제외 — lib/blog.ts 와 같은 규칙)
+    → [(slug, keyword 또는 title)]"""
+    today = os.environ.get('BUILD_DATE') or datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).date().isoformat()
+    out = []
+    for f in sorted((ROOT / 'content' / 'blog').glob('*.md')):
+        if f.name.startswith('_'):
+            continue
+        raw = f.read_text(encoding='utf-8')
+        head = raw.split('---', 2)[1] if raw.startswith('---') else ''
+        meta = {k.strip(): v.strip().strip("'") for k, v in (l.split(':', 1) for l in head.splitlines() if ':' in l)}
+        if meta.get('slug') and (meta.get('date') or meta.get('publishedAt') or '') <= today:
+            out.append((meta['slug'], meta.get('keyword') or meta.get('title', '')))
+    return out
+
+
 if __name__ == '__main__':
     assert fnv('a') == 0xE40C292C  # FNV-1a 기준값
     force = '--force' in sys.argv
     OUT.mkdir(parents=True, exist_ok=True)
     pages = json.loads((ROOT / 'data/site-pages.json').read_text(encoding='utf-8'))['pages']
     jobs = [('home', '바람은 들이고,|벌레는 창 밖에', 'mesh-insect.jpg'),  # lib/photos.ts HOME_HERO
-            ('area', '지역별 방충망 안내', HERO[fnv('area') % len(HERO)])]
+            ('area', '지역별 방충망 안내', HERO[fnv('area') % len(HERO)]),
+            ('blog', '방충망 궁금한 것들', HERO[fnv('blog') % len(HERO)])]
+    # 블로그 글: blog-<slug>.jpg, 사진은 lib/photos.ts heroPhoto('blog-<slug>') 와 같게
+    jobs += [(f'blog-{s}', kw, HERO[fnv(f'blog-{s}') % len(HERO)]) for s, kw in blog_posts()]
     jobs += [(p['slug'], p['kw'], HERO[fnv(p['slug']) % len(HERO)]) for p in pages if not p.get('variantOf')]  # 변형 페이지는 대표 이미지
     jobs = [j for j in jobs if force or not (OUT / f'{j[0]}.jpg').exists()]
     for i, j in enumerate(jobs, 1):

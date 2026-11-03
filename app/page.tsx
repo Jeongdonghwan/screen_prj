@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { cityHubs, pagePath } from '../lib/data';
+import { getPosts, postPath } from '../lib/blog';
 import { BRAND, CONTACT } from '../lib/site';
 
 export const metadata: Metadata = { alternates: { canonical: '/', types: { 'application/rss+xml': '/rss.xml' } }, openGraph: { type: 'website', siteName: BRAND, locale: 'ko_KR', url: '/', images: ogImages('home', BRAND) } };
@@ -30,6 +31,7 @@ const FAQ = [
 
 export default function Home() {
   const hubs = cityHubs();
+  const posts = getPosts().slice(0, 6);
   return (
     <main>
       <JsonLd data={[faqJsonLd(FAQ), itemListJsonLd(hubs.flatMap((h) => h.pages).slice(0, 30))]} />
@@ -111,6 +113,18 @@ export default function Home() {
           <p data-reveal><Link href="/area/" className="more">전체 지역 페이지 <IconArrow /></Link></p>
         </div>
       </section>
+
+      {posts.length > 0 && (
+        <section className="sec line-top" id="blog">
+          <div className="wrap">
+            <SectionHead title="방충망 궁금한 것들" sub="망 종류, 교체 시점, 실측처럼 상담 때 자주 듣는 질문에 답한 글입니다." />
+            <ul className="home-posts reveal-group">
+              {posts.map((p) => <li key={p.slug}><Link href={postPath(p)}><time dateTime={p.publishedAt}>{p.publishedAt}</time><strong>{p.title}</strong></Link></li>)}
+            </ul>
+            <p data-reveal><Link href="/blog/" className="more">전체 글 보기 <IconArrow /></Link></p>
+          </div>
+        </section>
+      )}
 
       <section className="sec gray">
         <div className="wrap">
