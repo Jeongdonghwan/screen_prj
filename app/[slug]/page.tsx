@@ -109,14 +109,14 @@ export default function KeywordPage({ params }: { params: { slug: string } }) {
 
       <section className="sec forest">
         <div className="wrap">
-          <SectionHead title="상담부터 점검까지" />
+          <SectionHead title={c.heads.steps} />
           <ol className="timeline reveal-group">{c.steps.map((st) => <li key={st.t}><strong>{st.t}</strong><p>{st.d}</p></li>)}</ol>
         </div>
       </section>
 
       <section className="sec">
         <div className="wrap">
-          <SectionHead title="이럴 때 바꿀 때입니다" />
+          <SectionHead title={c.heads.signs} />
           <div className="lists" data-reveal>
             <div><h3>교체 신호</h3><ul className="check">{c.signs.map((x) => <li key={x}>{x}</li>)}</ul></div>
             <div><h3>자주 놓치는 점</h3><ul className="warn">{c.pitfalls.map((x) => <li key={x}>{x}</li>)}</ul></div>
@@ -126,7 +126,7 @@ export default function KeywordPage({ params }: { params: { slug: string } }) {
 
       <section className="sec gray">
         <div className="wrap">
-          <SectionHead title="망 소재" />
+          <SectionHead title={c.heads.materials} />
           <div className="split">
             <PhotoFig p={matPh} alt={alt(matPh.scene)} />
             <dl className="types one reveal-group">{c.materials.map((x) => <div key={x.name}><dt>{x.name}</dt><dd>{x.d}</dd></div>)}</dl>
@@ -136,20 +136,21 @@ export default function KeywordPage({ params }: { params: { slug: string } }) {
 
       <section className="sec" id="photos">
         <div className="wrap">
-          <SectionHead title="창가 사진으로 보기" sub={`${p.kw} 참고 이미지 — 업체 시공 사진이 아닌 무료 사진입니다.`} />
+          <SectionHead title={c.heads.photos} sub={`${p.kw} 참고 이미지 — 업체 시공 사진이 아닌 무료 사진입니다.`} />
           <PhotoRail id="rail" photos={railPhotos(p.slug)} kw={p.kw} />
         </div>
       </section>
 
       <section className="sec gray" id="faq">
         <div className="wrap">
-          <SectionHead title="자주 묻는 질문" />
+          <SectionHead title={c.heads.faq} />
           <div className="faq">{c.faq.map((f) => <details key={f.q} data-reveal><summary>{f.q}<i /></summary><p>{f.a}</p></details>)}</div>
         </div>
       </section>
 
       <section className="sec">
         <div className="wrap related">
+          {rel.nearDong.length > 0 && <div><h3>{p.region.split(' ').slice(-1)[0]} 이웃 동네</h3><ul>{rel.nearDong.map((x) => <li key={x.slug}><Link href={pagePath(x)}>{x.kw}<IconArrow /></Link></li>)}</ul></div>}
           {rel.samePlace.length > 0 && <div><h3>{p.region} 다른 안내</h3><ul>{rel.samePlace.map((x) => <li key={x.slug}><Link href={pagePath(x)}>{x.kw}<IconArrow /></Link></li>)}</ul></div>}
           {rel.sameCity.length > 0 && <div><h3>{c.city.name} {p.word}</h3><ul>{rel.sameCity.map((x) => <li key={x.slug}><Link href={pagePath(x)}>{x.kw}<IconArrow /></Link></li>)}</ul></div>}
           {rel.otherCities.length > 0 && <div><h3>가까운 도시 {p.word}</h3><ul>{rel.otherCities.map((x) => <li key={x.slug}><Link href={pagePath(x)}>{x.kw}<IconArrow /></Link></li>)}</ul></div>}

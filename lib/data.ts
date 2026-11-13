@@ -1,6 +1,7 @@
 // 데이터 로더 — 키워드 페이지, 도시 사실. 빌드 전용.
 import pagesData from '../data/site-pages.json';
 import cityData from '../data/city-facts.json';
+import dongData from '../data/dong-facts.json';
 import { OPEN_WAVE, MERGE_VARIANTS } from './site';
 
 export interface Page { rank: number; kw: string; slug: string; word: string; region: string; level: string; city: string; sido: string; wave: number; variantOf?: string }
@@ -11,6 +12,10 @@ export const OPEN_PAGES = ALL_PAGES.filter((p) => p.wave <= OPEN_WAVE);
 const openSet = new Set(OPEN_PAGES.map((p) => p.slug));
 const CITIES = cityData.cities as City[];
 export const cityOf = (p: Page) => CITIES.find((c) => c.kw === p.city)!;
+// 동·읍면 위치 사실(행정동 경계 기준: 소속 시군구·행정동·경계를 맞댄 행정동) — scripts/dong_facts.py
+export interface Dong { adm: string; sgg: string; near: string[] }
+const DONGS = dongData.dongs as Record<string, Dong>;
+export const dongOf = (p: Page): Dong | undefined => (p.level === '동' || p.level === '읍면' ? DONGS[`${p.city}|${p.region.split(' ').slice(-1)[0]}`] : undefined);
 
 export const pagePath = (p: Page) => `/${p.slug}/`;
 export const pageEncodedPath = (p: Page) => `/${encodeURIComponent(p.slug)}/`;
@@ -38,6 +43,8 @@ export function related(p: Page) {
   const rot = <T,>(arr: T[], n: number) => { if (!arr.length) return arr; const k = hash(p.slug) % arr.length; return [...arr.slice(k), ...arr.slice(0, k)].slice(0, n); };
   return {
     samePlace: pool.filter((x) => x.region === p.region).slice(0, 12),
+    // 경계를 맞댄 행정동의 페이지 (같은 단어 먼저)
+    nearDong: (() => { const nb = new Set(dongOf(p)?.near || []); const xs = pool.filter((x) => x.city === p.city && x.region !== p.region && nb.has(x.region.split(' ').slice(-1)[0])); return [...xs.filter((x) => x.word === p.word), ...xs.filter((x) => x.word !== p.word)].slice(0, 8); })(),
     sameCity: rot(pool.filter((x) => x.city === p.city && x.region !== p.region && x.word === p.word), 8),
     otherCities: rot(pool.filter((x) => x.city !== p.city && x.word === p.word && x.level === '시' && x.sido === p.sido), 8),
   };

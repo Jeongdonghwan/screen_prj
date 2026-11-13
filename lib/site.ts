@@ -16,7 +16,7 @@ export const LINKS: { label: string; sub: string; url: string }[] = []; // 없�
 
 export const BUSINESS = { name: '', ceo: '', bizNumber: '', address: '' }; // 사업자 정보 없음(사용자 확인)
 
-export const OPEN_WAVE = Number(process.env.OPEN_WAVE || 4); // 누적 오픈 묶음 1~4 (scripts/import_pages.py 가 시·구 먼저 4등분)
+export const OPEN_WAVE = Number(process.env.OPEN_WAVE || 4); // 누적 오픈 묶음 1~4 (scripts/import_pages.py 가 시·구 먼저 4등분) / 추가 5 = 11/15 · 6 = 11/17 · 7 = 11/19 (scripts/add_extra_pages.py)
 export const MERGE_VARIANTS = true;
 
 export const tel = `tel:${CONTACT.phone.replace(/[^0-9]/g, '')}`;
