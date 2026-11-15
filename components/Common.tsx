@@ -1,6 +1,6 @@
 // 방충망 공통 UI — 각진 버튼, 선 아이콘, 왼쪽 정렬 섹션 머리(번호 없음), 창틀 액자 히어로 사진, 망 촘촘함 비교.
 import Link from 'next/link';
-import { BRAND, BRAND_EN, CONTACT, BUSINESS, LINKS, tel, smsHref } from '../lib/site';
+import { BRAND, BRAND_EN, CONTACT, BUSINESS, LINKS, UPDATED, tel, smsHref } from '../lib/site';
 import { MESH } from '../lib/compose';
 import type { Photo } from '../lib/photos';
 import credits from '../data/photo_credits.json';
@@ -71,7 +71,7 @@ export const Footer = () => (
       <div>
         <strong className="foot-brand">{BRAND}</strong>
         <p>방충망 실측·시공·교체. 일반망·촘촘망·미세망·롤방충망·현관방충망.</p>
-        <p className="foot-links"><Link href="/area/">지역별 안내</Link><Link href="/blog/">블로그</Link></p>
+        <p className="foot-links"><Link href="/about/">소개</Link><Link href="/area/">지역별 안내</Link><Link href="/blog/">블로그</Link></p>
         {LINKS.length > 0 && <p className="foot-links">{LINKS.map((l) => <a key={l.url} href={l.url} target="_blank" rel="noopener">{l.label}</a>)}</p>}
       </div>
       <ul className="foot-info">
@@ -83,7 +83,7 @@ export const Footer = () => (
         {BUSINESS.address && <li><span>주소</span>{BUSINESS.address}</li>}
       </ul>
     </div>
-    <div className="wrap foot-bottom">© {new Date().getFullYear()} {BRAND}
+    <div className="wrap foot-bottom">© {new Date().getFullYear()} {BRAND} · 최종 수정 <time dateTime={UPDATED}>{UPDATED}</time>
       <p className="foot-credit">참고 사진: Unsplash · Wikimedia Commons{' '}
         {CREDITS.map((c, i) => <span key={c.file}>{i ? ' · ' : '('}<a href={c.page} target="_blank" rel="noopener nofollow">{c.author}</a>, {c.license}{i === CREDITS.length - 1 ? ')' : ''}</span>)}
       </p>
