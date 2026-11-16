@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: `${BRAND} | 미세방충망·촘촘망·현관방충망 시공`, template: '%s' },
   description: '방충망 실측·시공·교체. 일반망·촘촘망·미세망 차이와 고르는 법, 현관 방충망·롤방충망 설치, 모헤어·망 교체까지.',
-  robots: { index: true, follow: true },
+  robots: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
   verification: { google: 'NXk27MmNQTC6SZUqvqQcsZIOUkR0xofIjCmXv2FojZE', other: { 'naver-site-verification': 'aafa8bd7e1bb021bcdbf2034744f8f795e2af362' } },
   alternates: { types: { 'application/rss+xml': `${SITE_URL}/rss.xml` } },
   openGraph: { type: 'website', siteName: BRAND, locale: 'ko_KR', images: ogImages('home', BRAND) },
@@ -28,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Footer />
         <StickyBar />
         <Motion />
+        <script dangerouslySetInnerHTML={{ __html: "document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[href]');if(!a)return;var h=a.getAttribute('href')||'',k=h.indexOf('tel:')===0?'tel':h.indexOf('sms:')===0?'sms':/kakao/.test(h)?'kakao':'';if(k&&navigator.sendBeacon)navigator.sendBeacon('/_t?e='+k+'&p='+encodeURIComponent(location.pathname))},true)" }} />
       </body>
     </html>
   );
