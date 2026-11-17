@@ -20,7 +20,7 @@ PAGES = os.path.join(ROOT, 'data', 'site-pages.json')
 SRC = os.path.join(ROOT, '..', 'region_kw_prj', 'keywords', '방충망_지역키워드.xlsx')
 XLSX = os.path.join(ROOT, 'keywords', '미세방충망_추가키워드.xlsx')
 DOMAIN = 'https://방충망시공.kr'
-N, PER = 1500, 500
+N, PER = 3500, 500   # 1,500(wave 5~7) + 2,000(wave 8~11, 2026-11-17 추가)
 drip = json.load(open(os.path.join(ROOT, 'data', 'drip.json'), encoding='utf-8'))
 DATES = {x['wave']: x['date'] for x in drip['extra']}
 
@@ -43,8 +43,22 @@ for rank, kw, _, word, region, level, city, sido, *_ in rows:
     new.append(dict(rank=rank, kw=kw, slug=slug, word=word, region=region, level=level, city=city, sido=sido))
     if len(new) == N:
         break
+# 키워드 파일이 바닥나면 사이트에 이미 있는 지역 × 이미 있는 단어 중 빈 조합으로 채운다 (많이 쓰는 단어부터, 지역은 우선순위 순)
+if len(new) < N:
+    from collections import Counter as _C
+    allp = pages + new
+    regs = {}
+    for p in allp: regs.setdefault((p['city'], p['region']), p)
+    top = max(p['rank'] for p in allp)
+    for w, _ in _C(p['word'] for p in allp).most_common():
+        for (city, region), s in regs.items():
+            if len(new) == N: break
+            kw = f'{region} {w}'; slug = kw.replace(' ', '-'); key = (city, w, norm(region), grp(s['level']))
+            if slug in have or key in keys: continue
+            have.add(slug); keys.add(key); top += 1
+            new.append(dict(rank=top, kw=kw, slug=slug, word=w, region=region, level=s['level'], city=city, sido=s['sido']))
 for i, p in enumerate(new):
-    p['wave'] = 5 + i // PER
+    p['wave'] = 5 + i // 500
 data['pages'] = pages + new
 json.dump(data, open(PAGES, 'w', encoding='utf-8'), ensure_ascii=False, indent=0)
 
