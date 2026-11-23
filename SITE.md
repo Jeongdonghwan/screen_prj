@@ -18,3 +18,7 @@ Next.js 정적 export 키워드 페이지 사이트. 데이터: `data/site-pages
 python scripts/drip/drip_status.py data/drip.json 2026-11-15   # WAVE=5
 OPEN_WAVE=7 SITE_URL=https://xn--ob0bt8vnwbbul7qo.kr npx next build
 ```
+
+## h1 수식어·레이 구조 적용(2026-11-24)
+키워드 페이지(`app/[slug]/page.tsx`, 조합 `lib/compose.ts` 의 `ray`·description)를 레이 모범 구조로: 분류 줄 → h1(`키워드` + `.hero-sub` 수식어, 주제별 2벌 + 대표 동네 1벌 해시 선택) → 설명 → "{키워드} 핵심 요약"(결론 + 사실 4칸) → 번호 절 6개(한 문단, 4개 h2 에 키워드 전체) → "{키워드} 자주 묻는 질문" → 관련 링크 3묶음(최대 12개). 망 비교 그림·사진 레일은 뺌(히어로 사진만). description 45~80자(키워드 — 관련 키워드 + 이웃 동네 + 전화). 주소·title·canonical 그대로. 점검 `python -I scripts/ray_check.py out`.
+측정(열린 5,500쪽, OPEN_WAVE=11): h1 중복 0 · 키워드 든 h2 6개 이상/쪽 · 본문(main) 평균 2,117자 · 절 문단 평균 197자 · 같은 단어 페이지 같은 문장 평균 최고 28%(쌍 최대 57%) · description 55~80자 중복 0 · 조사 오류 0.

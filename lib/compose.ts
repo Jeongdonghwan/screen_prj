@@ -48,7 +48,20 @@ export function compose(p: Page) {
     `${p.kw} — ${spot} 등 ${c.name} 방충망 ${t === 'fix' ? '교체·수리' : '시공'} | ${BRAND}`,
     `${p.kw} 상담 ${CONTACT.phone} | ${t === 'fine' ? '미세망·촘촘망' : t === 'roll' ? '롤방충망' : '방충망'} 안내`,
   ], s, 'title');
-  const description = `${area} ${label}. ${c.homes.split(/[,와과]/)[0].trim()} 창에 맞는 일반망·촘촘망·미세망 비교, 교체 시점, 시공 순서. 상담 ${CONTACT.phone}.`;
+  // description 45~80자 (§5-3, 2026-11-24): 키워드 — 관련 키워드 2~3개 + 페이지 사실 + 상담 전화
+  const DREL: Record<Topic, [string[], (w: string) => string]> = {
+    general: [['일반망', '촘촘망', '미세망'], (w) => `${w} 중 창에 맞는 망 고르기`],
+    fine: [['촘촘망', '미세망', '모헤어'], (w) => `${w}까지 비교해 창별로 고르기`],
+    door: [['롤', '자바라', '잠금형'], (w) => `${w} 가운데 현관에 맞는 방식`],
+    fix: [['망 교체', '모헤어', '바퀴'], (w) => `${w}까지 보는 교체`],
+    roll: [['말림 장치', '레일 수평', '망 소재'], (w) => `${w}부터 보는 롤방충망`],
+    install: [['실측', '망 선택', '틈 점검'], (w) => `${w} 순서로 하는 설치`],
+  };
+  const [dw, dt] = DREL[t];
+  const dSpot = rotate(c.spots.filter((x) => !p.kw.includes(x.replace(/[동읍면]$/, ''))), s, 'dspot')[0];
+  const dfact = near.length >= 2 ? `${near.slice(0, 2).join('·')} 등 이웃 동네도 실측 상담` : dSpot ? `${dSpot} 쪽 집 창 실측 상담` : '창 사진·실측 상담';
+  const description = [3, 2].flatMap((n) => [`${p.kw} — ${dt(dw.slice(0, n).join('·'))}. ${dfact} ${CONTACT.phone}`, `${p.kw} — ${dt(dw.slice(0, n).join('·'))}. 상담 ${CONTACT.phone}`])
+    .find((x) => x.length <= 80) || `${p.kw} — ${dt(dw[0])}. ${CONTACT.phone}`;
 
   const lead = pick([
     `${area} 창에 맞는 망부터 고릅니다. 바람을 더 받을지, 작은 벌레까지 막을지에 따라 답이 다릅니다.`,
@@ -157,7 +170,7 @@ export function compose(p: Page) {
     '틀을 억지로 끼우면 레일이 상해 오히려 틈이 커집니다.',
     '어두운 색 망이 밝은 색 망보다 밖이 잘 보입니다. 색도 고를 때 함께 봅니다.',
     `${dname} 집이라도 남향 창은 볕에 망이 빨리 삭습니다. 소재를 먼저 보세요.`,
-  ], s, 'pit').slice(0, 2);
+  ], s, 'pit').slice(0, 3);
 
   const MATERIALS = [
     { name: '알루미늄망', d: pick(['가볍고 흔히 쓰는 기본 소재입니다.', '구하기 쉬워 가장 널리 쓰는 망입니다.', '가벼워 큰 창에도 무리가 없지만 눌리면 자국이 남습니다.'], s, 'ma') },
@@ -202,8 +215,43 @@ export function compose(p: Page) {
   const causesHeading = pick([`${area}, 벌레는 어디로 들어올까`, '벌레가 들어오는 길 세 가지', `${label} 전에 원인부터`], s, 'csh');
   const meshOn = t === 'fine' ? ['dense', 'fine'] : t === 'general' || t === 'install' ? ['normal', 'dense'] : [pick(['normal', 'dense', 'fine'], s, 'mo')];
 
+  // ---- 레이 모범 구조 (2026-11-24): 분류 줄 → h1(키워드+수식어) → 설명 → 핵심 요약 → 번호 절 6개(한 문단) → FAQ → 관련 링크 ----
+  // 규칙: ~/.claude/skills/programmatic-seo/references/composer-patterns.md §5-1·5-2. 위 재료 문장만 다시 묶는다(새 사실 없음).
+  const stem = (x: string) => x.replace(/[동읍면]$/, '');
+  const spotH = rotate(c.spots.filter((x) => !p.kw.includes(stem(x))), s, 'h1spot')[0];
+  const H1: Record<Topic, string[]> = {
+    general: p.word === '방충망업체' ? ['실측·모헤어 교체까지 하는지 보기', '망 종류를 고를 수 있는지 확인하기'] : ['망·틀·틈 중 어디를 손볼지부터', '거실·방 창마다 다른 망 고르기'],
+    fine: ['작은 벌레와 통풍 사이에서 고르기', '촘촘망·미세망 차이와 고르는 순서'],
+    door: ['롤·자바라 중 현관에 맞는 방식', '문틀·도어클로저 위치부터 보는 설치'],
+    fix: ['망만 바꿀지 틀째 바꿀지 가르기', '모헤어·바퀴까지 함께 보는 교체'],
+    roll: ['말림 장치와 레일 수평부터', '베란다·현관 큰 창에 맞추기'],
+    install: ['실측부터 설치 점검까지', '샷시 레일에 맞춰 새로 다는 순서'],
+  };
+  const spotSub: Record<Topic, string> = { general: '같은 단지 창, 실측부터 시공까지', fine: '같은 단지 방 창부터 바꾸기', door: '같은 단지 현관 폭에 맞추기', fix: '같은 단지 창 교체 순서', roll: '같은 단지 큰 창에 맞추기', install: '같은 단지 창에 새로 맞추기' };
+  const h1sub = pick([...H1[t], ...(spotH ? [`${spotH} ${spotSub[t]}`] : [])], s, 'h1sub');
+  const SEQ = ['먼저', '이어서', '그다음', '그 뒤에', '끝으로'];
+  const KW_AT = new Set([0, 1, 2, 4]);
+  const head = (i: number, subs: string[]) => { const sub = pick(subs, s, `rh${i}`); return KW_AT.has(i) ? `${p.kw}: ${sub}` : sub; };
+  const meshName: Record<string, string> = { normal: '일반망', dense: '촘촘망', fine: '미세망' };
+  const intro0 = intro[0];
+  const raySummary = [
+    intro0,
+    `${area} 상담은 창 사진으로 샷시 종류를 보고, 실측한 뒤 창마다 망과 소재를 정합니다.`,
+    pick([`${area} 상담은 전화나 문자 ${CONTACT.phone}로 받습니다.`, `${area} 창 사진은 문자 ${CONTACT.sms}로 보내 주시면 됩니다.`], s, 'rsum'),
+  ].join(' ');
+  const regionBody = pick([`${j(c.name, '은')} ${c.homes}. 신축은 샷시 기본 방충망을 촘촘망으로 바꾸는 문의가, 구축은 망·모헤어 교체 문의가 많습니다.`, `${c.traits}. ${spot} 쪽은 아파트 단지가, 외곽은 단독주택과 상가가 많아 창 모양이 다양합니다.`, ...(df ? [`${j(dname, '이')} 속한 ${j(c.name, '은')} ${c.traits}. 오래된 집은 망·모헤어 교체를, 새 집은 망 종류 변경을 많이 묻습니다.`] : [])], s, 'rb');
+  const raySections = [
+    { h: head(0, ['동네 집과 샷시', '지역 창 특징', '이 동네 집들의 창']), p: [regionBody, loc || P2[1], regionBody.includes(c.homes) ? '' : `${j(c.name, '은')} ${c.homes} 쪽 집이 많아 창 크기와 샷시 종류가 집마다 다릅니다.`, near.length ? `${area} 가까이 ${near.join(', ')}에서도 같은 기준으로 실측하고 시공합니다.` : '', (WORD[p.word] || ANGLE[t]).length >= 4 ? pick((WORD[p.word] || ANGLE[t]).filter((x) => x !== intro0), s, 'w2') : ''].filter(Boolean).join(' ') },
+    { h: head(1, ['망 촘촘함 고르기', '바람과 벌레 사이에서 망 고르기', '일반망·촘촘망·미세망 비교']), p: [a1, ...['normal', 'dense', 'fine'].map((k) => `${j(meshName[k], '은')} ${meshText[k]}`), a2].filter(Boolean).join(' ') },
+    { h: head(2, ['벌레가 들어오는 길', '원인부터 찾기']), p: [`${area} 집에서 벌레가 들어오는 길은 ${causes.map((x) => x.t).join(', ')} 순서로 확인합니다.`, ...causes.map((x) => x.d)].join(' ') },
+    { h: head(3, ['창마다 다르게', '공간별로 고르는 망', '어느 창에 무엇을']), p: [`${area} 집에서는 ${rooms.map((r) => r.room).join(', ')} 순서로 봅니다.`, ...rooms.map((r) => r.text), roomOrder[3] ? pick(ROOMS[roomOrder[3]], s, 'rm3') : '', ...Object.keys(ROOMS).filter((r) => !roomOrder.includes(r)).slice(0, 1).map((r) => pick(ROOMS[r], s, 'rm4')), pitfalls[0]].filter(Boolean).join(' ') },
+    { h: head(4, ['진행 순서', '상담부터 점검까지']), p: [...steps.map((x, i) => `${SEQ[i]} ${x.d}`), pitfalls[1], pitfalls[2]].join(' ') },
+    { h: head(5, ['교체 신호와 망 소재', '언제 바꾸고 무엇으로 바꿀까']), p: [`바꿀 때가 됐다는 신호는 ‘${signs[0]}’, ‘${signs[1]}’, ‘${signs[2]}’ 같은 경우입니다.`, ...materials.map((m) => `${j(m.name, '은')} ${m.d}`), a3].filter(Boolean).join(' ') },
+  ];
+  const ray = { cat: [c.name, df && where !== c.name ? where.replace(`${c.name} `, '') : '', label].filter(Boolean).join(' · '), h1sub, summary: raySummary, sections: raySections };
+
   return {
-    topic: t, city: c, area, causes, causesHeading, title, description, lead, intro, rooms, signs, pitfalls, materials, steps, faq, meshOn,
+    topic: t, city: c, area, causes, ray, causesHeading, title, description, lead, intro, rooms, signs, pitfalls, materials, steps, faq, meshOn,
     specs: [['지역', area], ['망 종류', '일반망 · 촘촘망 · 미세망'], ['상담', `${CONTACT.phone} · 문자 ${CONTACT.sms}`]] as [string, string][],
     region: {
       heading: pick([`${c.name} 집들의 창`, `${area} 방충망 상담`, `${place.split(' ').slice(-1)[0]} 창은 이렇습니다`], s, 'rh'),
