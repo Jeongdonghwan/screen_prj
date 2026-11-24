@@ -228,7 +228,18 @@ export function compose(p: Page) {
     install: ['실측부터 설치 점검까지', '샷시 레일에 맞춰 새로 다는 순서'],
   };
   const spotSub: Record<Topic, string> = { general: '같은 단지 창, 실측부터 시공까지', fine: '같은 단지 방 창부터 바꾸기', door: '같은 단지 현관 폭에 맞추기', fix: '같은 단지 창 교체 순서', roll: '같은 단지 큰 창에 맞추기', install: '같은 단지 창에 새로 맞추기' };
-  const h1sub = pick([...H1[t], ...(spotH ? [`${spotH} ${spotSub[t]}`] : [])], s, 'h1sub');
+  // title 앞부분 = h1 (§5-1, 2026-11-24): "키워드 수식어"가 40자를 넘으면 더 짧은 벌을 고르고, 그래도 넘으면 구 단위로 자른다
+  const fitSub = (cands: string[]) => {
+    const max = 40 - p.kw.length - 1;
+    const r = rotate(cands, s, 'h1sub');
+    const ok = r.find((x) => x.length <= max);
+    if (ok) return ok;
+    const w = [...r].sort((a, b) => a.length - b.length)[0].split(' ');
+    while (w.length > 1 && w.join(' ').length > max) w.pop();
+    return w.join(' ');
+  };
+  const h1sub = fitSub([...H1[t], ...(spotH ? [`${spotH} ${spotSub[t]}`] : [])]);
+  const rayTitle = `${p.kw} ${h1sub} | ${BRAND}`; void title;
   const SEQ = ['먼저', '이어서', '그다음', '그 뒤에', '끝으로'];
   const KW_AT = new Set([0, 1, 2, 4]);
   const head = (i: number, subs: string[]) => { const sub = pick(subs, s, `rh${i}`); return KW_AT.has(i) ? `${p.kw}: ${sub}` : sub; };
@@ -251,7 +262,7 @@ export function compose(p: Page) {
   const ray = { cat: [c.name, df && where !== c.name ? where.replace(`${c.name} `, '') : '', label].filter(Boolean).join(' · '), h1sub, summary: raySummary, sections: raySections };
 
   return {
-    topic: t, city: c, area, causes, ray, causesHeading, title, description, lead, intro, rooms, signs, pitfalls, materials, steps, faq, meshOn,
+    topic: t, city: c, area, causes, ray, causesHeading, title: rayTitle, description, lead, intro, rooms, signs, pitfalls, materials, steps, faq, meshOn,
     specs: [['지역', area], ['망 종류', '일반망 · 촘촘망 · 미세망'], ['상담', `${CONTACT.phone} · 문자 ${CONTACT.sms}`]] as [string, string][],
     region: {
       heading: pick([`${c.name} 집들의 창`, `${area} 방충망 상담`, `${place.split(' ').slice(-1)[0]} 창은 이렇습니다`], s, 'rh'),
