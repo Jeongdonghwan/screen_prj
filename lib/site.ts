@@ -1,7 +1,7 @@
 // 사이트 설정 — 연락처·고정 링크·사업자 정보. TODO 표시는 업체 정보를 받으면 채운다.
 
 export const SITE_URL = process.env.SITE_URL || 'https://xn--ob0bt8vnwbbul7qo.kr'; // 방충망시공.kr (퓨니코드)
-export const BRAND = '방충망 시공'; // TODO: 상호
+export const BRAND = '방충망시공';
 export const BRAND_EN = 'WINDOW SCREEN';
 
 export const CONTACT = {
