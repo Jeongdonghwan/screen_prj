@@ -239,7 +239,7 @@ export function compose(p: Page) {
     return w.join(' ');
   };
   const h1sub = fitSub([...H1[t], ...(spotH ? [`${spotH} ${spotSub[t]}`] : [])]);
-  const rayTitle = `${p.kw} ${h1sub} | ${BRAND}`; void title;
+  const rayTitle = `${p.kw} ${h1sub} | ${BRAND}`.length <= 40 ? `${p.kw} ${h1sub} | ${BRAND}` : `${p.kw} ${h1sub}`; // 40자 넘으면 상호를 뺀다 void title;
   const SEQ = ['먼저', '이어서', '그다음', '그 뒤에', '끝으로'];
   const KW_AT = new Set([0, 1, 2, 4]);
   const head = (i: number, subs: string[]) => { const sub = pick(subs, s, `rh${i}`); return KW_AT.has(i) ? `${p.kw}: ${sub}` : sub; };
